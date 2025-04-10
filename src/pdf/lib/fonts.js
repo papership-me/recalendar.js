@@ -21,13 +21,17 @@ const ARIMO = 'Arimo';
 export const LATO = 'Lato';
 const MONTSERRAT = 'Montserrat';
 const SOURCE_SERIF_PRO = 'SourceSerifPro';
-export const AVAILABLE_FONTS = [ ARIMO, LATO, MONTSERRAT, SOURCE_SERIF_PRO ];
+const KOPUB = 'KoPub Dotum';
+const PRETENDARD = 'Pretendard';
+export const AVAILABLE_FONTS = [ ARIMO, LATO, MONTSERRAT, SOURCE_SERIF_PRO, KOPUB, PRETENDARD ];
 
 const FONT_DEFINITIONS = {
 	...generateFontDefinition( ARIMO ),
 	...generateFontDefinition( LATO ),
 	...generateFontDefinition( MONTSERRAT ),
 	...generateFontDefinition( SOURCE_SERIF_PRO ),
+	...generateFontDefinition( KOPUB ),
+	...generateFontDefinition( PRETENDARD ),
 };
 
 export function getFontDefinition( font ) {
