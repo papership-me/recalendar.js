@@ -4,7 +4,8 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import i18nextLoader from 'vite-plugin-i18next-loader';
 
-export default defineConfig( {
+export default defineConfig({
+	root: '.',
 	build: {
 		rollupOptions: {
 			input: {
@@ -12,20 +13,29 @@ export default defineConfig( {
 			},
 		},
 	},
+	server: {
+		open: '/create.html',
+	},
 	plugins: [
-		i18nextLoader( { paths: [ './src/locales' ], namespaceResolution: 'basename' } ),
+		i18nextLoader({
+			paths: ['./src/locales'],
+			namespaceResolution: 'basename',
+		}),
 		react(),
 	],
 	resolve: {
 		alias: {
-			'~': path.resolve( __dirname, 'src' ),
+			'~': path.resolve(__dirname, 'src'),
 		},
 	},
 	worker: {
 		format: 'es',
 		plugins: () => [
-			i18nextLoader( { paths: [ './src/locales' ], namespaceResolution: 'basename' } ),
+			i18nextLoader({
+				paths: ['./src/locales'],
+				namespaceResolution: 'basename',
+			}),
 			react(),
 		],
 	},
-} );
+});
