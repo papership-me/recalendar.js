@@ -93,6 +93,7 @@
 			"empty": "Empty itinerary",
 			"placeholder": {
 				"lines": "Number of lines",
+				"spacing": "Line spacing",
 				"page": "New page break",
 				"item": "Itinerary item"
 			},

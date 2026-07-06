@@ -1,8 +1,12 @@
-import { StyleSheet, Text } from '@react-pdf/renderer';
+import { StyleSheet, Text, View } from '@react-pdf/renderer';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { ITINERARY_ITEM, ITINERARY_LINES } from '~/lib/itinerary-utils';
+import {
+	ITINERARY_ITEM,
+	ITINERARY_LINES,
+	normalizeItineraryItem,
+} from '~/lib/itinerary-utils';
 
 class Itinerary extends React.PureComponent {
 	styles = StyleSheet.create( {
@@ -14,16 +18,22 @@ class Itinerary extends React.PureComponent {
 			minHeight: 20,
 			padding: '2 0 0 5',
 		},
+		blankLine: {
+			borderBottom: '1 solid #AAA',
+			height: 20,
+			minHeight: 20,
+		},
 	} );
 
-	renderItineraryItem = ( { type, value }, index ) => {
+	renderItineraryItem = ( item, index ) => {
+		const { type, value, spacing } = normalizeItineraryItem( item );
 		switch ( type ) {
 			case ITINERARY_ITEM:
 				return this.renderItem( value, index );
 
 			case ITINERARY_LINES:
 			default:
-				return this.renderLines( value );
+				return this.renderLines( value, spacing, index );
 		}
 	};
 
@@ -35,10 +45,17 @@ class Itinerary extends React.PureComponent {
 		);
 	}
 
-	renderLines( count ) {
+	renderLines( count, spacing, groupIndex ) {
 		const lines = [];
+		const lineStyle = {
+			...this.styles.blankLine,
+			height: spacing,
+			minHeight: spacing,
+		};
 		for ( let i = 0; i < count; i++ ) {
-			lines.push( <Text key={ i } style={ this.styles.line }></Text> );
+			lines.push(
+				<View key={ groupIndex + '-' + i } style={ lineStyle }></View>,
+			);
 		}
 
 		return lines;

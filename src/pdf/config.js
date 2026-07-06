@@ -3,7 +3,11 @@ import { t } from 'i18next';
 
 import { REMARKABLE, getPageProperties } from '~/lib/device-utils';
 import { wrapWithId } from '~/lib/id-utils';
-import { ITINERARY_ITEM, ITINERARY_LINES } from '~/lib/itinerary-utils';
+import {
+	ITINERARY_ITEM,
+	ITINERARY_LINES,
+	normalizeItineraryItem,
+} from '~/lib/itinerary-utils';
 import {
 	HOLIDAY_DAY_TYPE,
 	EVENT_DAY_TYPE,
@@ -71,18 +75,18 @@ class PdfConfig {
 				type: ITINERARY_ITEM,
 				value: t( 'month.goal', { ns: 'config' } ),
 			},
-			{
+			normalizeItineraryItem( {
 				type: ITINERARY_LINES,
 				value: 2,
-			},
+			} ),
 			{
 				type: ITINERARY_ITEM,
 				value: t( 'month.notes', { ns: 'config' } ),
 			},
-			{
+			normalizeItineraryItem( {
 				type: ITINERARY_LINES,
 				value: 50,
-			},
+			} ),
 		];
 		this.isWeekOverviewEnabled = true;
 		this.todos = [
@@ -94,7 +98,9 @@ class PdfConfig {
 		this.dayItineraries = [ ...Array( 7 ).keys() ].map( () => {
 			const itinerary = {
 				dayOfWeek,
-				items: [ { type: ITINERARY_LINES, value: 50 } ],
+				items: [
+					normalizeItineraryItem( { type: ITINERARY_LINES, value: 50 } ),
+				],
 				isEnabled: true,
 			};
 			dayOfWeek = ++dayOfWeek % 7;
@@ -102,10 +108,10 @@ class PdfConfig {
 		} );
 		this.isWeekRetrospectiveEnabled = true;
 		this.weekRetrospectiveItinerary = [
-			{
+			normalizeItineraryItem( {
 				type: ITINERARY_LINES,
 				value: 50,
-			},
+			} ),
 		];
 		this.device = REMARKABLE;
 		const { dpi, pageSize } = getPageProperties( this.device );
@@ -151,13 +157,15 @@ class PdfConfig {
 		this.ensureUniqueIds();
 	}
 
+	normalizeItineraryItems( items ) {
+		return items.map( ( item ) => wrapWithId( normalizeItineraryItem( item ) ) );
+	}
+
 	ensureUniqueIds() {
 		const fieldsRequiringUniqueIds = [
 			'habits',
-			'monthItinerary',
 			'specialDates',
 			'todos',
-			'weekRetrospectiveItinerary',
 		];
 
 		fieldsRequiringUniqueIds.forEach( ( field ) => {
@@ -165,8 +173,12 @@ class PdfConfig {
 			this[ field ] = thisField.map( wrapWithId );
 		} );
 
+		this.monthItinerary = this.normalizeItineraryItems( this.monthItinerary );
+		this.weekRetrospectiveItinerary = this.normalizeItineraryItems(
+			this.weekRetrospectiveItinerary,
+		);
 		this.dayItineraries = this.dayItineraries.map( ( dayItinerary ) => {
-			dayItinerary.items = dayItinerary.items.map( wrapWithId );
+			dayItinerary.items = this.normalizeItineraryItems( dayItinerary.items );
 			return dayItinerary;
 		} );
 	}

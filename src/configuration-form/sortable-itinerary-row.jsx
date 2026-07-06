@@ -9,6 +9,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import { useTranslation } from 'react-i18next';
 
 import {
+	DEFAULT_ITINERARY_LINE_SPACING,
 	ITINERARY_ITEM,
 	ITINERARY_LINES,
 	ITINERARY_NEW_PAGE,
@@ -16,9 +17,11 @@ import {
 
 function SortableItineraryRow( props ) {
 	const { t } = useTranslation( 'app' );
-	const { id, type, value, field, onChange } = props;
+	const { id, type, value, field, onChange, spacing } = props;
 	const { attributes, listeners, setNodeRef, transform, transition } =
 		useSortable( { id } );
+	const lineSpacing =
+		spacing == null ? DEFAULT_ITINERARY_LINE_SPACING : spacing;
 
 	const style = {
 		transform: CSS.Transform.toString( transform ),
@@ -33,7 +36,8 @@ function SortableItineraryRow( props ) {
 				onChange={ onChange }
 				data-id={ id }
 				data-type={ ITINERARY_ITEM }
-				data-field={ props.field }
+				data-field={ field }
+				data-property="value"
 				required
 			/>
 		);
@@ -49,24 +53,46 @@ function SortableItineraryRow( props ) {
 
 	function renderLines() {
 		return (
-			<FloatingLabel
-				className="flex-grow-1"
-				controlId={ id }
-				label={ t( 'configuration.itinerary.placeholder.lines' ) }
-			>
-				<FormControl
-					placeholder={ t( 'configuration.itinerary.placeholder.lines' ) }
-					type="number"
-					min={ 1 }
-					max={ 50 }
-					value={ value }
-					onChange={ onChange }
-					data-id={ id }
-					data-type={ ITINERARY_LINES }
-					data-field={ field }
-					required
-				/>
-			</FloatingLabel>
+			<>
+				<FloatingLabel
+					className="flex-grow-1"
+					controlId={ id }
+					label={ t( 'configuration.itinerary.placeholder.lines' ) }
+				>
+					<FormControl
+						placeholder={ t( 'configuration.itinerary.placeholder.lines' ) }
+						type="number"
+						min={ 1 }
+						max={ 50 }
+						value={ value }
+						onChange={ onChange }
+						data-id={ id }
+						data-type={ ITINERARY_LINES }
+						data-field={ field }
+						data-property="value"
+						required
+					/>
+				</FloatingLabel>
+				<FloatingLabel
+					className="flex-grow-1"
+					controlId={ id + '-spacing' }
+					label={ t( 'configuration.itinerary.placeholder.spacing' ) }
+				>
+					<FormControl
+						placeholder={ t( 'configuration.itinerary.placeholder.spacing' ) }
+						type="number"
+						min={ 1 }
+						max={ 100 }
+						value={ lineSpacing }
+						onChange={ onChange }
+						data-id={ id }
+						data-type={ ITINERARY_LINES }
+						data-field={ field }
+						data-property="spacing"
+						required
+					/>
+				</FloatingLabel>
+			</>
 		);
 	}
 
@@ -135,6 +161,7 @@ SortableItineraryRow.propTypes = {
 		PropTypes.string,
 		PropTypes.number,
 	] ).isRequired,
+	spacing: PropTypes.number,
 };
 
 export default SortableItineraryRow;

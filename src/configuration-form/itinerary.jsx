@@ -20,7 +20,12 @@ import Stack from 'react-bootstrap/Stack';
 import { useTranslation } from 'react-i18next';
 
 import SortableItineraryRow from './sortable-itinerary-row';
-import { ITINERARY_ITEM, ITINERARY_LINES, ITINERARY_NEW_PAGE } from '~/lib/itinerary-utils';
+
+import {
+	ITINERARY_ITEM,
+	ITINERARY_LINES,
+	ITINERARY_NEW_PAGE,
+} from '~/lib/itinerary-utils';
 
 function Itinerary( props ) {
 	const { t } = useTranslation( 'app' );
@@ -34,7 +39,7 @@ function Itinerary( props ) {
 		}
 	}
 
-	function renderRow( { id, value, type } ) {
+	function renderRow( { id, value, type, spacing } ) {
 		return (
 			<SortableItineraryRow
 				key={ id }
@@ -42,6 +47,7 @@ function Itinerary( props ) {
 				id={ id }
 				type={ type }
 				value={ value }
+				spacing={ spacing }
 				onChange={ props.onChange }
 				onRemove={ props.onRemove }
 			/>

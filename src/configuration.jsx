@@ -27,6 +27,10 @@ import ToggleAccordionItem from '~/configuration-form/toggle-accordion-item';
 import { getWeekdays } from '~/lib/date';
 import { AVAILABLE_DEVICES, CUSTOM, getPageProperties } from '~/lib/device-utils';
 import { byId, wrapWithId } from '~/lib/id-utils';
+import {
+	DEFAULT_ITINERARY_LINE_SPACING,
+	ITINERARY_LINES,
+} from '~/lib/itinerary-utils';
 import PdfConfig, { hydrateFromObject } from '~/pdf/config';
 import { AVAILABLE_FONTS } from '~/pdf/lib/fonts';
 
@@ -174,7 +178,7 @@ class Configuration extends React.PureComponent {
 		this.setState( { weekendDays: newWeekendDays } );
 	};
 
-	handleDownload = ( event ) => {
+	handleDownload = () => {
 		this.setState( { isGeneratingPdf: true } );
 		this.generatePdf( false );
 	};
@@ -237,30 +241,57 @@ class Configuration extends React.PureComponent {
 		this.setState( { [ field ]: newItems } );
 	};
 
+	createItineraryItem( type ) {
+		const itineraryItem = {
+			type,
+			value: '',
+		};
+
+		if ( type === ITINERARY_LINES ) {
+			itineraryItem.spacing = DEFAULT_ITINERARY_LINE_SPACING;
+		}
+
+		return wrapWithId( itineraryItem );
+	}
+
+	getItineraryChangeValue( event ) {
+		const { property = 'value', type } = event.target.dataset;
+		const shouldConvertToNumber =
+			type === ITINERARY_LINES || property === 'spacing';
+
+		return shouldConvertToNumber
+			? Number( event.target.value )
+			: event.target.value;
+	}
+
+	getUpdatedItineraryItem( event, currentItem ) {
+		const { id, property = 'value', type } = event.target.dataset;
+		return {
+			...currentItem,
+			id,
+			type,
+			[ property ]: this.getItineraryChangeValue( event ),
+		};
+	}
+
 	handleItineraryAdd = ( event ) => {
 		const field = event.target.dataset.field;
 		const newItinerary = [ ...this.state[ field ] ];
-		newItinerary.push(
-			wrapWithId( {
-				type: event.target.dataset.type,
-				value: '',
-			} ),
-		);
+		newItinerary.push( this.createItineraryItem( event.target.dataset.type ) );
 		this.setState( { [ field ]: newItinerary } );
 	};
 
 	handleItineraryChange = ( event ) => {
-		const { field, id, type } = event.target.dataset;
+		const { field, id } = event.target.dataset;
 		const newItinerary = [ ...this.state[ field ] ];
 		const index = this.state[ field ].findIndex( byId( id ) );
 		if ( index === -1 ) {
 			return;
 		}
-		newItinerary[ index ] = {
-			id,
-			type,
-			value: type === 'lines' ? Number( event.target.value ) : event.target.value,
-		};
+		newItinerary[ index ] = this.getUpdatedItineraryItem(
+			event,
+			newItinerary[ index ],
+		);
 		this.setState( { [ field ]: newItinerary } );
 	};
 
@@ -307,22 +338,24 @@ class Configuration extends React.PureComponent {
 		}
 	};
 
-	handlePdfGeneration = ( { blob, url, loading, error } ) => {
+	handlePdfGeneration = ( { loading } ) => {
 		const { t } = this.props;
 		return loading ? t( 'loading' ) : t( 'download-ready' );
 	};
 
 	handleDayItineraryChange = ( event ) => {
 		const newItineraries = [ ...this.state.dayItineraries ];
-		const { field, type } = event.target.dataset;
+		const { field } = event.target.dataset;
 		const index = this.state.dayItineraries[ field ].items.findIndex(
 			byId( event.target.dataset.id ),
 		);
-		newItineraries[ field ].items[ index ] = {
-			id: event.target.dataset.id,
-			type,
-			value: type === 'lines' ? Number( event.target.value ) : event.target.value,
-		};
+		if ( index === -1 ) {
+			return;
+		}
+		newItineraries[ field ].items[ index ] = this.getUpdatedItineraryItem(
+			event,
+			newItineraries[ field ].items[ index ],
+		);
 		this.setState( { dayItineraries: newItineraries } );
 	};
 
@@ -353,12 +386,7 @@ class Configuration extends React.PureComponent {
 	handleDayItineraryAdd = ( event ) => {
 		const newItineraries = [ ...this.state.dayItineraries ];
 		const { field, type } = event.target.dataset;
-		newItineraries[ field ].items.push(
-			wrapWithId( {
-				type,
-				value: '',
-			} ),
-		);
+		newItineraries[ field ].items.push( this.createItineraryItem( type ) );
 		this.setState( { dayItineraries: newItineraries } );
 	};
 
@@ -764,4 +792,6 @@ Configuration.propTypes = {
 	t: PropTypes.func.isRequired,
 };
 
-export default withTranslation( [ 'app' ] )( Configuration );
+const TranslatedConfiguration = withTranslation( [ 'app' ] )( Configuration );
+
+export default TranslatedConfiguration;
